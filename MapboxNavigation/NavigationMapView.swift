@@ -112,7 +112,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
         }
         set {
             if tracksUserCourse || userLocationForCourseTracking != nil {
-                super.showsUserLocation = false
+//                super.showsUserLocation = false
                 
                 if userCourseView == nil {
                     userCourseView = UserPuckCourseView(frame: CGRect(origin: .zero, size: CGSize(width: 75, height: 75)))
@@ -120,7 +120,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
                 userCourseView?.isHidden = !newValue
             } else {
                 userCourseView?.isHidden = true
-                super.showsUserLocation = newValue
+//                super.showsUserLocation = newValue
             }
         }
     }
@@ -185,7 +185,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
                 } else {
                     userCourseView.center = userAnchorPoint
                 }
-                addSubview(userCourseView)
+                // addSubview(userCourseView)
             }
         }
     }
@@ -216,7 +216,6 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
         if let config = config {
             ConfigManager.shared.config = config
         }
-        
         self.init(frame: frame, styleURL: styleURL)
     }
     
@@ -225,6 +224,8 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
         makeGestureRecognizersUpdateCourseView()
         
         resumeNotifications()
+        super.showsUserLocation = true
+        setUserTrackingMode(.follow, animated: true, completionHandler: nil)
     }
     
     deinit {
@@ -440,7 +441,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
     func fit(to route: Route, facing direction:CLLocationDirection = 0, padding: UIEdgeInsets = NavigationMapView.defaultPadding, animated: Bool = false) {
         guard let coords = route.coordinates, !coords.isEmpty else { return }
       
-        setUserTrackingMode(.none, animated: false, completionHandler: nil)
+        setUserTrackingMode(.follow, animated: false, completionHandler: nil)
         let line = MGLPolyline(coordinates: coords, count: UInt(coords.count))
         let camera = cameraThatFitsShape(line, direction: direction, edgePadding: padding)
         
@@ -1071,7 +1072,7 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
         let slicedLine = Polyline(coordinates).sliced(from: userLocation).coordinates
         let line = MGLPolyline(coordinates: slicedLine, count: UInt(slicedLine.count))
         
-        tracksUserCourse = false
+       tracksUserCourse = false
         
         // If the user has a short distance left on the route, prevent the camera from zooming all the way.
         // `MGLMapView.setVisibleCoordinateBounds(:edgePadding:animated:)` will go beyond what is convenient for the driver.
