@@ -6,7 +6,8 @@ extension Locale {
      Given the app's localized language setting, returns a string representing the user's localization.
      */
     public static var preferredLocalLanguageCountryCode: String {
-        let firstBundleLocale = Bundle.main.preferredLocalizations.first!
+//        let firstBundleLocale = Bundle.main.preferredLocalizations.first!
+        let firstBundleLocale = localeVoice
         let bundleLocale = firstBundleLocale.components(separatedBy: "-")
         
         if bundleLocale.count > 1 {
@@ -19,6 +20,11 @@ extension Locale {
         
         return firstBundleLocale
     }
+    
+    /**
+     Set locale language
+     */
+    public static var localeVoice = "en"
     
     /**
      Returns a `Locale` from `preferredLocalLanguageCountryCode`.
