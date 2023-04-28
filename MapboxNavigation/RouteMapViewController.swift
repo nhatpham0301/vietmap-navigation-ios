@@ -200,15 +200,15 @@ class RouteMapViewController: UIViewController {
     }
 
     @objc func recenter(_ sender: AnyObject) {
+        mapView.trackUpdateCourse = false
         mapView.tracksUserCourse = true
-        mapView.enableFrameByFrameCourseViewTracking(for: 3)
         isInOverviewMode = false
         updateCameraAltitude(for: routeController.routeProgress)
-
+        /*
         mapView.addArrow(route: routeController.routeProgress.route,
                          legIndex: routeController.routeProgress.legIndex,
                          stepIndex: routeController.routeProgress.currentLegProgress.stepIndex + 1)
-
+        */
         removePreviewInstructions()
     }
 
@@ -258,7 +258,9 @@ class RouteMapViewController: UIViewController {
 
         instructionsBannerView.updateDistance(for: routeController.routeProgress.currentLegProgress.currentStepProgress)
 
+        /*
         mapView.addArrow(route: routeController.routeProgress.route, legIndex: routeController.routeProgress.legIndex, stepIndex: routeController.routeProgress.currentLegProgress.stepIndex + 1)
+         */
         mapView.showRoutes([routeController.routeProgress.route], legIndex: routeController.routeProgress.legIndex)
         mapView.showWaypoints(routeController.routeProgress.route)
 
@@ -333,7 +335,9 @@ class RouteMapViewController: UIViewController {
 
     func updateMapOverlays(for routeProgress: RouteProgress) {
         if routeProgress.currentLegProgress.followOnStep != nil {
+            /*
             mapView.addArrow(route: routeController.routeProgress.route, legIndex: routeController.routeProgress.legIndex, stepIndex: routeController.routeProgress.currentLegProgress.stepIndex + 1)
+             */
         } else {
             mapView.removeArrow()
         }
@@ -343,22 +347,31 @@ class RouteMapViewController: UIViewController {
         guard mapView.tracksUserCourse else { return } //only adjust when we are actively tracking user course
 
         let zoomOutAltitude = mapView.zoomedOutMotorwayAltitude
-        let defaultAltitude = mapView.defaultAltitude
+        let defaultAltitude: CLLocationDistance = 500.0
         let isLongRoad = routeProgress.distanceRemaining >= mapView.longManeuverDistance
         let currentStep = routeProgress.currentLegProgress.currentStep
         let upComingStep = routeProgress.currentLegProgress.upComingStep
-
-        //If the user is at the last turn maneuver, the map should zoom in to the default altitude.
-        let currentInstruction = routeProgress.currentLegProgress.currentStepProgress.currentSpokenInstruction
 
         //If the user is on a motorway, not exiting, and their segment is sufficently long, the map should zoom out to the motorway altitude.
         //otherwise, zoom in if it's the last instruction on the step.
         let currentStepIsMotorway = currentStep.isMotorway
         let nextStepIsMotorway = upComingStep?.isMotorway ?? false
         if currentStepIsMotorway, nextStepIsMotorway, isLongRoad {
-            setCamera(altitude: zoomOutAltitude)
-        } else if currentInstruction == currentStep.lastInstruction {
-            setCamera(altitude: defaultAltitude)
+            updateCamera(defaultAltitude: zoomOutAltitude)
+        } else {
+            updateCamera(defaultAltitude: defaultAltitude)
+        }
+    }
+    
+    private func updateCamera(defaultAltitude: CLLocationDistance) {
+        if let location = routeController.locationManager.location {
+            let camera = MGLMapCamera(
+                lookingAtCenter: location.coordinate,
+                acrossDistance: defaultAltitude,
+                pitch: 45,
+                heading: location.course
+            )
+            self.navigationView.mapView.setCamera(camera, withDuration: 1, animationTimingFunction: nil)
         }
     }
 
@@ -838,7 +851,9 @@ extension RouteMapViewController: NavigationViewDelegate {
         mapView.showWaypoints(routeController.routeProgress.route, legIndex: routeController.routeProgress.legIndex)
 
         if routeController.routeProgress.currentLegProgress.stepIndex + 1 <= routeController.routeProgress.currentLegProgress.leg.steps.count {
+            /*
             mapView.addArrow(route: routeController.routeProgress.route, legIndex: routeController.routeProgress.legIndex, stepIndex: routeController.routeProgress.currentLegProgress.stepIndex + 1)
+             */
         }
 
         if annotatesSpokenInstructions {
@@ -867,7 +882,9 @@ extension RouteMapViewController: StepsViewControllerDelegate {
         mapView.setCenter(upcomingStep.maneuverLocation, zoomLevel: mapView.zoomLevel, direction: upcomingStep.initialHeading!, animated: true, completionHandler: nil)
 
         guard isViewLoaded && view.window != nil else { return }
+        /*
         mapView.addArrow(route: routeController.routeProgress.route, legIndex: legIndex, stepIndex: stepIndex + 1)
+         */
     }
 
     func addPreviewInstructions(step: RouteStep, maneuverStep: RouteStep, distance: CLLocationDistance?) {

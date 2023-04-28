@@ -165,11 +165,18 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
             } else {
                 courseTrackingDelegate?.navigationMapViewDidStopTrackingCourse?(self)
             }
-            if let location = userLocationForCourseTracking {
+            if let location = userLocationForCourseTracking, trackUpdateCourse {
                 updateCourseTracking(location: location, animated: true)
+            } else {
+                trackUpdateCourse = true
             }
         }
     }
+    
+    /**
+     Turn off/on updateCourseTracking when tracksUserCourse update
+     */
+    open var trackUpdateCourse = true
 
     /**
      A `UIView` used to indicate the user’s location and course on the map.
@@ -245,15 +252,17 @@ open class NavigationMapView: MGLMapView, UIGestureRecognizerDelegate {
         addSubview(imageView)
     }
     
+    /* Author NhatPV
     open override func layoutSubviews() {
         super.layoutSubviews()
         
         //If the map is in tracking mode, make sure we update the camera after the layout pass.
         if (tracksUserCourse) {
-            updateCourseTracking(location: userLocationForCourseTracking, camera:self.camera, animated: false)
+            updateCourseTracking(location: userLocationForCourseTracking, animated: false)
         }
     }
-    
+    */
+
     open override func anchorPoint(forGesture gesture: UIGestureRecognizer) -> CGPoint {
         if tracksUserCourse {
             return userAnchorPoint
