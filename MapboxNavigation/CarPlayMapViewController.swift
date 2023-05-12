@@ -42,8 +42,6 @@ class CarPlayMapViewController: UIViewController, MGLMapViewDelegate {
         let mapView = NavigationMapView()
         mapView.delegate = self
 //        mapView.navigationMapDelegate = self
-        mapView.logoView.isHidden = true
-        mapView.attributionButton.isHidden = true
         
         self.view = mapView
     }

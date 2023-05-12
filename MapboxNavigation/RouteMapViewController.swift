@@ -82,11 +82,9 @@ class RouteMapViewController: UIViewController {
                 navigationView.overviewButton.isHidden = true
                 navigationView.resumeButton.isHidden = false
                 navigationView.wayNameView.isHidden = true
-                mapView.logoView.isHidden = true
             } else {
                 navigationView.overviewButton.isHidden = false
                 navigationView.resumeButton.isHidden = true
-                mapView.logoView.isHidden = false
             }
         }
     }
@@ -571,13 +569,11 @@ extension RouteMapViewController: NavigationViewDelegate {
     // MARK: NavigationMapViewCourseTrackingDelegate
     func navigationMapViewDidStartTrackingCourse(_ mapView: NavigationMapView) {
         navigationView.resumeButton.isHidden = true
-        mapView.logoView.isHidden = false
     }
 
     func navigationMapViewDidStopTrackingCourse(_ mapView: NavigationMapView) {
         navigationView.resumeButton.isHidden = false
         navigationView.wayNameView.isHidden = true
-        mapView.logoView.isHidden = true
     }
 
     //MARK: InstructionsBannerViewDelegate

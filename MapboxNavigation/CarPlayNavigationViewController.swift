@@ -71,8 +71,6 @@ public class CarPlayNavigationViewController: UIViewController, MGLMapViewDelega
         let mapView = NavigationMapView(frame: view.bounds)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         mapView.compassView.isHidden = true
-        mapView.logoView.isHidden = true
-        mapView.attributionButton.isHidden = true
         mapView.delegate = self
 
         mapView.defaultAltitude = 500
