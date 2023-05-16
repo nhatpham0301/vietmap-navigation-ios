@@ -19,6 +19,8 @@ class ViewController: UIViewController, MGLMapViewDelegate {
     @IBOutlet weak var clearMap: UIButton!
     @IBOutlet weak var bottomBarBackground: UIView!
     
+    private var navigationViewController: NavigationViewController!
+    
     // MARK: Properties
     var mapView: NavigationMapView? {
         didSet {
@@ -75,7 +77,7 @@ class ViewController: UIViewController, MGLMapViewDelegate {
         alertController = UIAlertController(title: "Start Navigation", message: "Select the navigation type", preferredStyle: .actionSheet)
         
         typealias ActionHandler = (UIAlertAction) -> Void
-        
+        simulationButton.isSelected = false
         let basic: ActionHandler = {_ in self.startBasicNavigation() }
         let day: ActionHandler = {_ in self.startNavigation(styles: [DayStyle()]) }
         let night: ActionHandler = {_ in self.startNavigation(styles: [NightStyle()]) }
@@ -104,12 +106,13 @@ class ViewController: UIViewController, MGLMapViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        self.mapView = NavigationMapView(frame: view.bounds, styleURL: nil)
+        self.mapView = NavigationMapView(frame: view.bounds, styleURL: URL(string: "https://api.maptiler.com/maps/streets/style.json?key=AVXR2vOTw3aGpqw8nlv2"))
 
         // Reset the navigation styling to the defaults if we are returning from a presentation.
         if (presentedViewController != nil) {
             DayStyle().apply()
         }
+        Locale.localeVoice = "vi"
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -244,9 +247,9 @@ class ViewController: UIViewController, MGLMapViewDelegate {
 
         let styles = [CustomDayStyle(), CustomNightStyle()]
 
-        let navigationViewController = NavigationViewController(for: route, styles: styles, locationManager: navigationLocationManager())
+        self.navigationViewController = NavigationViewController(for: route, styles: styles, locationManager: navigationLocationManager())
         navigationViewController.delegate = self
-
+        navigationViewController.mapView?.showsUserHeadingIndicator = true
         presentAndRemoveMapview(navigationViewController)
     }
 
@@ -256,10 +259,29 @@ class ViewController: UIViewController, MGLMapViewDelegate {
     }
 
     func presentAndRemoveMapview(_ navigationViewController: NavigationViewController) {
+        self.navigationViewController.mapView?.styleURL = URL(string: "https://api.maptiler.com/maps/streets/style.json?key=AVXR2vOTw3aGpqw8nlv2");
+        self.navigationViewController.mapView?.tracksUserCourse = true
+        NotificationCenter.default.addObserver(self, selector: #selector(progressDidChange(_ :)), name: .routeControllerProgressDidChange, object: nil)
         present(navigationViewController, animated: true) {
             self.mapView?.removeFromSuperview()
             self.mapView = nil
         }
+    }
+    
+    @objc func progressDidChange(_ notification: NSNotification ) {
+        let routeProgress = notification.userInfo![RouteControllerNotificationUserInfoKey.routeProgressKey] as! RouteProgress
+        let location = notification.userInfo![RouteControllerNotificationUserInfoKey.locationKey] as! CLLocation
+        if ((navigationViewController.mapView?.tracksUserCourse) != nil && (navigationViewController.mapView?.tracksUserCourse) == true) {
+            let camera = MGLMapCamera(
+                lookingAtCenter: location.coordinate,
+                acrossDistance: 500,
+                pitch: 75,
+                heading: location.course
+            )
+            print("locaiton: \(location.coordinate)")
+            navigationViewController.mapView?.setCamera(camera, animated: true)
+        }
+        navigationViewController.mapView?.updateCourseTracking(location: location, animated: true)
     }
 
     func configureMapView(_ mapView: NavigationMapView) {
@@ -267,7 +289,6 @@ class ViewController: UIViewController, MGLMapViewDelegate {
         mapView.delegate = self
         mapView.navigationMapDelegate = self
         mapView.userTrackingMode = .follow
-        mapView.logoView.isHidden = true
 
         let singleTap = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress(tap:)))
         mapView.gestureRecognizers?.filter({ $0 is UILongPressGestureRecognizer }).forEach(singleTap.require(toFail:))
@@ -376,7 +397,7 @@ extension ViewController: NavigationViewControllerDelegate {
         }
 
         confirmationController.delegate = self
-
+        self.mapView = NavigationMapView(frame: view.bounds, styleURL: URL(string: "https://api.maptiler.com/maps/streets/style.json?key=AVXR2vOTw3aGpqw8nlv2"))
         navigationViewController.present(confirmationController, animated: true, completion: nil)
         return false
     }
@@ -384,6 +405,7 @@ extension ViewController: NavigationViewControllerDelegate {
     // Called when the user hits the exit button.
     // If implemented, you are responsible for also dismissing the UI.
     func navigationViewControllerDidDismiss(_ navigationViewController: NavigationViewController, byCanceling canceled: Bool) {
+        self.mapView = NavigationMapView(frame: view.bounds, styleURL: URL(string: "https://api.maptiler.com/maps/streets/style.json?key=AVXR2vOTw3aGpqw8nlv2"))
         navigationViewController.dismiss(animated: true, completion: nil)
     }
 }
