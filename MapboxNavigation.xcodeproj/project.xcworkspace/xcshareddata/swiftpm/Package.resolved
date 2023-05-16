@@ -1,12 +1,12 @@
 {
   "pins" : [
     {
-      "identity" : "map-ios-sdk",
+      "identity" : "maplibre-gl-native-distribution",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nhatpham0301/map-ios-sdk.git",
+      "location" : "https://github.com/maplibre/maplibre-gl-native-distribution",
       "state" : {
-        "revision" : "f805a50ae5a565db01156b8ab060f923c599e568",
-        "version" : "1.0.3"
+        "revision" : "d761956e81e74d8bdbfba31e0ec3a75616190658",
+        "version" : "5.12.2"
       }
     }
   ],
