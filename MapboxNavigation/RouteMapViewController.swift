@@ -976,7 +976,7 @@ fileprivate extension UIView.AnimationOptions {
         case .linear:
             self = .curveLinear
         @unknown default:
-            fatalError("Unknown curve")
+            self = .curveEaseIn
         }
     }
 }

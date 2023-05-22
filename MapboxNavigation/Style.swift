@@ -185,7 +185,7 @@ public class ResumeButton: UIControl {
         }
     }
     
-    let imageView = UIImageView(image: UIImage(named: "location", in: .mapboxNavigation, compatibleWith: nil)!.withRenderingMode(.alwaysTemplate))
+    let imageView = UIImageView(image: UIImage(named: "recenter", in: .mapboxNavigation, compatibleWith: nil)!.withRenderingMode(.alwaysTemplate))
     let titleLabel = UILabel()
     
     public override init(frame: CGRect) {

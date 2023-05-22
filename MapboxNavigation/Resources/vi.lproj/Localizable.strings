@@ -71,7 +71,7 @@
 "REROUTING" = "Đang tính tuyến mới…";
 
 /* Button title for resume tracking */
-"RESUME" = "Tiếp tục";
+"RESUME" = "Về giữa";
 
 /* The text of a banner that appears during turn-by-turn navigation when route simulation is enabled. */
 "USER_IN_SIMULATION_MODE" = "Đang Mô phỏng Điều hướng (Tốc độ Gấp %d Lần)";

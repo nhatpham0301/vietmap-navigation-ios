@@ -275,7 +275,7 @@ open class NavigationViewController: UIViewController {
     /**
      Shows a button that allows drivers to report feedback such as accidents, closed roads,  poor instructions, etc. Defaults to `true`.
      */
-    @objc public var showsReportFeedback: Bool = true {
+    @objc public var showsReportFeedback: Bool = false {
         didSet {
             mapViewController?.reportButton.isHidden = !showsReportFeedback
             showsEndOfRouteFeedback = showsReportFeedback
@@ -349,6 +349,11 @@ open class NavigationViewController: UIViewController {
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
+    
+    // Reciver feedback from user
+    @objc public var commentNavigation = ""
+    
+    @objc public var ratingNavigation = 5
     
     /**
      Initializes a `NavigationViewController` that provides turn by turn navigation for the given route. A optional `direction` object is needed for  potential rerouting.
@@ -588,6 +593,8 @@ extension NavigationViewController: RouteMapViewControllerDelegate {
     }
     
     func mapViewControllerDidDismiss(_ mapViewController: RouteMapViewController, byCanceling canceled: Bool) {
+        commentNavigation = mapViewController.endOfRouteViewController.comment ?? ""
+        ratingNavigation = mapViewController.endOfRouteViewController.rating
         if delegate?.navigationViewControllerDidDismiss?(self, byCanceling: canceled) != nil {
             // The receiver should handle dismissal of the NavigationViewController
         } else {
