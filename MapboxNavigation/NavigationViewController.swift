@@ -207,7 +207,7 @@ open class NavigationViewController: UIViewController {
                 routeController.routeProgress = RouteProgress(route: route)
             }
             NavigationSettings.shared.distanceUnit = route.routeOptions.locale.usesMetric ? .kilometer : .mile
-            mapViewController?.notifyDidReroute(route: route)
+            routeMapViewController?.notifyDidReroute(route: route)
         }
     }
     
@@ -245,7 +245,7 @@ open class NavigationViewController: UIViewController {
      */
     @objc public var routeController: RouteController! {
         didSet {
-            mapViewController?.routeController = routeController
+            routeMapViewController?.routeController = routeController
         }
     }
     
@@ -256,7 +256,7 @@ open class NavigationViewController: UIViewController {
      */
     @objc public var mapView: NavigationMapView? {
         get {
-            return mapViewController?.mapView
+            return routeMapViewController?.mapView
         }
     }
     
@@ -277,7 +277,7 @@ open class NavigationViewController: UIViewController {
      */
     @objc public var showsReportFeedback: Bool = false {
         didSet {
-            mapViewController?.reportButton.isHidden = !showsReportFeedback
+            routeMapViewController?.reportButton.isHidden = !showsReportFeedback
             showsEndOfRouteFeedback = showsReportFeedback
         }
     }
@@ -287,7 +287,7 @@ open class NavigationViewController: UIViewController {
     */
     @objc public var showsEndOfRouteFeedback: Bool = true {
         didSet {
-            mapViewController?.showsEndOfRoute = showsEndOfRouteFeedback
+            routeMapViewController?.showsEndOfRoute = showsEndOfRouteFeedback
         }
     }
     
@@ -310,7 +310,7 @@ open class NavigationViewController: UIViewController {
      */
     @objc public var isUsedInConjunctionWithCarPlayWindow = false {
         didSet {
-            mapViewController?.isUsedInConjunctionWithCarPlayWindow = isUsedInConjunctionWithCarPlayWindow
+            routeMapViewController?.isUsedInConjunctionWithCarPlayWindow = isUsedInConjunctionWithCarPlayWindow
         }
     }
     
@@ -322,7 +322,7 @@ open class NavigationViewController: UIViewController {
         }
     }
     
-    var mapViewController: RouteMapViewController?
+    @objc public var routeMapViewController: RouteMapViewController?
     
     /**
      A Boolean value that determines whether the map annotates the locations at which instructions are spoken for debugging purposes.
@@ -335,8 +335,8 @@ open class NavigationViewController: UIViewController {
     
     var currentStatusBarStyle: UIStatusBarStyle = .default {
         didSet {
-            mapViewController?.instructionsBannerView.backgroundColor = InstructionsBannerView.appearance().backgroundColor
-            mapViewController?.instructionsBannerContentView.backgroundColor = InstructionsBannerContentView.appearance().backgroundColor
+            routeMapViewController?.instructionsBannerView.backgroundColor = InstructionsBannerView.appearance().backgroundColor
+            routeMapViewController?.instructionsBannerContentView.backgroundColor = InstructionsBannerContentView.appearance().backgroundColor
         }
     }
     
@@ -385,7 +385,7 @@ open class NavigationViewController: UIViewController {
         routeController.resume()
         
         let mapViewController = RouteMapViewController(routeController: self.routeController, delegate: self)
-        self.mapViewController = mapViewController
+        self.routeMapViewController = mapViewController
         mapViewController.destination = route.legs.last?.destination
         mapViewController.willMove(toParent: self)
         addChild(mapViewController)
@@ -427,7 +427,7 @@ open class NavigationViewController: UIViewController {
         
         if routeController.locationManager is SimulatedLocationManager {
             let localized = String.Localized.simulationStatus(speed: 1)
-            mapViewController?.statusView.show(localized, showSpinner: false, interactive: true)
+            routeMapViewController?.statusView.show(localized, showSpinner: false, interactive: true)
         }
     }
     
@@ -458,7 +458,7 @@ open class NavigationViewController: UIViewController {
         let location = notification.userInfo![RouteControllerNotificationUserInfoKey.locationKey] as! CLLocation
         let secondsRemaining = routeProgress.currentLegProgress.currentStepProgress.durationRemaining
 
-        mapViewController?.notifyDidChange(routeProgress: routeProgress, location: location, secondsRemaining: secondsRemaining)
+        routeMapViewController?.notifyDidChange(routeProgress: routeProgress, location: location, secondsRemaining: secondsRemaining)
         
         // If the user has arrived, don't snap the user puck.
         // In the case the user drives beyond the waypoint,
@@ -468,14 +468,14 @@ open class NavigationViewController: UIViewController {
         
         if snapsUserLocationAnnotationToRoute,
             userHasArrivedAndShouldPreventRerouting {
-            mapViewController?.mapView.updateCourseTracking(location: location, animated: true)
+            routeMapViewController?.mapView.updateCourseTracking(location: location, animated: true)
         }
     }
     
     @objc func didPassInstructionPoint(notification: NSNotification) {
         let routeProgress = notification.userInfo![RouteControllerNotificationUserInfoKey.routeProgressKey] as! RouteProgress
         
-        mapViewController?.updateCameraAltitude(for: routeProgress)
+        routeMapViewController?.updateCameraAltitude(for: routeProgress)
         
         clearStaleNotifications()
         
@@ -633,7 +633,7 @@ extension NavigationViewController: RouteControllerDelegate {
     }
     
     @objc public func routeController(_ routeController: RouteController, didRerouteAlong route: Route) {
-        mapViewController?.notifyDidReroute(route: route)
+        routeMapViewController?.notifyDidReroute(route: route)
         delegate?.navigationViewController?(self, didRerouteAlong: route)
     }
     
@@ -657,9 +657,9 @@ extension NavigationViewController: RouteControllerDelegate {
             let snappedLocation = routeController.location ?? locations.last,
             let rawLocation = locations.last,
             userHasArrivedAndShouldPreventRerouting {
-            mapViewController?.labelCurrentRoad(at: rawLocation, for: snappedLocation)
+            routeMapViewController?.labelCurrentRoad(at: rawLocation, for: snappedLocation)
         } else if let rawlocation = locations.last {
-            mapViewController?.labelCurrentRoad(at: rawlocation)
+            routeMapViewController?.labelCurrentRoad(at: rawlocation)
         }
     }
     
@@ -668,7 +668,7 @@ extension NavigationViewController: RouteControllerDelegate {
         
         if !isConnectedToCarPlay, // CarPlayManager shows rating on CarPlay if it's connected
             routeController.routeProgress.isFinalLeg && advancesToNextLeg && showsEndOfRouteFeedback {
-            self.mapViewController?.showEndOfRoute { _ in }
+            self.routeMapViewController?.showEndOfRoute { _ in }
         }
         return advancesToNextLeg
     }

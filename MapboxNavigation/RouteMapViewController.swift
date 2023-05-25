@@ -8,9 +8,9 @@ import AVFoundation
 class ArrowFillPolyline: MGLPolylineFeature {}
 class ArrowStrokePolyline: ArrowFillPolyline {}
 
-class RouteMapViewController: UIViewController {
+open class RouteMapViewController: UIViewController {
 
-    var navigationView: NavigationView { return view as! NavigationView }
+    @objc public var navigationView: NavigationView { return view as! NavigationView }
     var mapView: NavigationMapView { return navigationView.mapView }
     var statusView: StatusView { return navigationView.statusView }
     var reportButton: FloatingButton { return navigationView.reportButton }
@@ -112,12 +112,12 @@ class RouteMapViewController: UIViewController {
     }
 
 
-    override func loadView() {
+    open override func loadView() {
         view = NavigationView(delegate: self)
         view.frame = parent?.view.bounds ?? UIScreen.main.bounds
     }
 
-    override func viewDidLoad() {
+    open override func viewDidLoad() {
         super.viewDidLoad()
 
         mapView.contentInset = contentInsets
@@ -140,7 +140,7 @@ class RouteMapViewController: UIViewController {
         removeTimer()
     }
 
-    override func viewWillAppear(_ animated: Bool) {
+    open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
         resetETATimer()
@@ -164,7 +164,7 @@ class RouteMapViewController: UIViewController {
         }
     }
 
-    override func viewDidAppear(_ animated: Bool) {
+    open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         annotatesSpokenInstructions = delegate?.mapViewControllerShouldAnnotateSpokenInstructions(self) ?? false
         showRouteIfNeeded()
@@ -172,7 +172,7 @@ class RouteMapViewController: UIViewController {
         currentStepIndexMapped = routeController.routeProgress.currentLegProgress.stepIndex
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
+    open override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         removeTimer()
     }
@@ -198,15 +198,19 @@ class RouteMapViewController: UIViewController {
     }
 
     @objc func recenter(_ sender: AnyObject) {
-        mapView.trackUpdateCourse = false
-        mapView.tracksUserCourse = true
-        isInOverviewMode = false
-        updateCameraAltitude(for: routeController.routeProgress)
+        recenter()
         /*
         mapView.addArrow(route: routeController.routeProgress.route,
                          legIndex: routeController.routeProgress.legIndex,
                          stepIndex: routeController.routeProgress.currentLegProgress.stepIndex + 1)
         */
+    }
+    
+    @objc public func recenter() {
+        mapView.trackUpdateCourse = false
+        mapView.tracksUserCourse = true
+        isInOverviewMode = false
+        updateCameraAltitude(for: routeController.routeProgress)
         removePreviewInstructions()
     }
 
@@ -225,6 +229,10 @@ class RouteMapViewController: UIViewController {
     }
 
     @objc func toggleOverview(_ sender: Any) {
+       toggleOverview()
+    }
+    
+    @objc public func toggleOverview() {
         mapView.enableFrameByFrameCourseViewTracking(for: 3)
         if let coordinates = routeController.routeProgress.route.coordinates, let userLocation = routeController.locationManager.location?.coordinate {
             mapView.setOverheadCameraView(from: userLocation, along: coordinates, for: overheadInsets)
@@ -236,15 +244,19 @@ class RouteMapViewController: UIViewController {
         sender.isSelected = !sender.isSelected
 
         let muted = sender.isSelected
+       toggleMute(muted: muted)
+    }
+    
+    @objc public func toggleMute(muted: Bool) {
         NavigationSettings.shared.voiceMuted = muted
     }
 
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         mapView.enableFrameByFrameCourseViewTracking(for: 3)
     }
 
-    override func viewDidLayoutSubviews() {
+    open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         mapView.setContentInset(contentInsets, animated: true, completionHandler: nil)
         mapView.setNeedsUpdateConstraints()
@@ -384,11 +396,11 @@ class RouteMapViewController: UIViewController {
         mapView.altitude = altitude
     }
 
-    func mapView(_ mapView: MGLMapView, imageFor annotation: MGLAnnotation) -> MGLAnnotationImage? {
+    public func mapView(_ mapView: MGLMapView, imageFor annotation: MGLAnnotation) -> MGLAnnotationImage? {
         return navigationMapView(mapView, imageFor: annotation)
     }
 
-    func mapView(_ mapView: MGLMapView, viewFor annotation: MGLAnnotation) -> MGLAnnotationView? {
+    public func mapView(_ mapView: MGLMapView, viewFor annotation: MGLAnnotation) -> MGLAnnotationView? {
         return navigationMapView(mapView, viewFor: annotation)
     }
 
@@ -524,7 +536,7 @@ class RouteMapViewController: UIViewController {
 // MARK: - UIContentContainer
 
 extension RouteMapViewController {
-    override func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer) {
+    open override func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer) {
         navigationView.endOfRouteHeightConstraint?.constant = container.preferredContentSize.height
 
         UIView.animate(withDuration: 0.3, animations: view.layoutIfNeeded)
@@ -540,7 +552,7 @@ extension RouteMapViewController: NavigationViewDelegate {
     }
 
     // MARK: MGLMapViewDelegate
-    func mapView(_ mapView: MGLMapView, regionDidChangeAnimated animated: Bool) {
+    public func mapView(_ mapView: MGLMapView, regionDidChangeAnimated animated: Bool) {
         var userTrackingMode = mapView.userTrackingMode
         if let mapView = mapView as? NavigationMapView, mapView.tracksUserCourse {
             userTrackingMode = .followWithCourse
@@ -550,7 +562,7 @@ extension RouteMapViewController: NavigationViewDelegate {
         }
     }
 
-    func mapView(_ mapView: MGLMapView, didFinishLoading style: MGLStyle) {
+    public func mapView(_ mapView: MGLMapView, didFinishLoading style: MGLStyle) {
         // This method is called before the view is added to a window
         // (if the style is cached) preventing UIAppearance to apply the style.
         showRouteIfNeeded()
@@ -558,30 +570,30 @@ extension RouteMapViewController: NavigationViewDelegate {
         delegate?.mapView?(mapView, didFinishLoading: style)
     }
 
-    func mapViewDidFinishLoadingMap(_ mapView: MGLMapView) {
+    public func mapViewDidFinishLoadingMap(_ mapView: MGLMapView) {
         delegate?.mapViewDidFinishLoadingMap?(mapView)
     }
 
-    func label(_ label: InstructionLabel, willPresent instruction: VisualInstruction, as presented: NSAttributedString) -> NSAttributedString? {
+    public func label(_ label: InstructionLabel, willPresent instruction: VisualInstruction, as presented: NSAttributedString) -> NSAttributedString? {
         return delegate?.label?(label, willPresent: instruction, as: presented)
     }
 
     // MARK: NavigationMapViewCourseTrackingDelegate
-    func navigationMapViewDidStartTrackingCourse(_ mapView: NavigationMapView) {
+    public func navigationMapViewDidStartTrackingCourse(_ mapView: NavigationMapView) {
         navigationView.resumeButton.isHidden = true
     }
 
-    func navigationMapViewDidStopTrackingCourse(_ mapView: NavigationMapView) {
+    public func navigationMapViewDidStopTrackingCourse(_ mapView: NavigationMapView) {
         navigationView.resumeButton.isHidden = false
         navigationView.wayNameView.isHidden = true
     }
 
     //MARK: InstructionsBannerViewDelegate
-    func didDragInstructionsBanner(_ sender: BaseInstructionsBannerView) {
+    public func didDragInstructionsBanner(_ sender: BaseInstructionsBannerView) {
         displayPreviewInstructions()
     }
 
-    func didTapInstructionsBanner(_ sender: BaseInstructionsBannerView) {
+    public func didTapInstructionsBanner(_ sender: BaseInstructionsBannerView) {
         displayPreviewInstructions()
     }
     
@@ -611,47 +623,47 @@ extension RouteMapViewController: NavigationViewDelegate {
     }
 
     //MARK: NavigationMapViewDelegate
-    func navigationMapView(_ mapView: NavigationMapView, routeStyleLayerWithIdentifier identifier: String, source: MGLSource) -> MGLStyleLayer? {
+    public func navigationMapView(_ mapView: NavigationMapView, routeStyleLayerWithIdentifier identifier: String, source: MGLSource) -> MGLStyleLayer? {
         return delegate?.navigationMapView?(mapView, routeStyleLayerWithIdentifier: identifier, source: source)
     }
 
-    func navigationMapView(_ mapView: NavigationMapView, routeCasingStyleLayerWithIdentifier identifier: String, source: MGLSource) -> MGLStyleLayer? {
+    public func navigationMapView(_ mapView: NavigationMapView, routeCasingStyleLayerWithIdentifier identifier: String, source: MGLSource) -> MGLStyleLayer? {
         return delegate?.navigationMapView?(mapView, routeCasingStyleLayerWithIdentifier: identifier, source: source)
     }
 
-    func navigationMapView(_ mapView: NavigationMapView, waypointStyleLayerWithIdentifier identifier: String, source: MGLSource) -> MGLStyleLayer? {
+    public func navigationMapView(_ mapView: NavigationMapView, waypointStyleLayerWithIdentifier identifier: String, source: MGLSource) -> MGLStyleLayer? {
         return delegate?.navigationMapView?(mapView, waypointStyleLayerWithIdentifier: identifier, source: source)
     }
 
-    func navigationMapView(_ mapView: NavigationMapView, waypointSymbolStyleLayerWithIdentifier identifier: String, source: MGLSource) -> MGLStyleLayer? {
+    public func navigationMapView(_ mapView: NavigationMapView, waypointSymbolStyleLayerWithIdentifier identifier: String, source: MGLSource) -> MGLStyleLayer? {
         return delegate?.navigationMapView?(mapView, waypointSymbolStyleLayerWithIdentifier: identifier, source: source)
     }
 
-    func navigationMapView(_ mapView: NavigationMapView, shapeFor waypoints: [Waypoint], legIndex: Int) -> MGLShape? {
+    public func navigationMapView(_ mapView: NavigationMapView, shapeFor waypoints: [Waypoint], legIndex: Int) -> MGLShape? {
         return delegate?.navigationMapView?(mapView, shapeFor: waypoints, legIndex: legIndex)
     }
 
-    func navigationMapView(_ mapView: NavigationMapView, shapeFor routes: [Route]) -> MGLShape? {
+    public func navigationMapView(_ mapView: NavigationMapView, shapeFor routes: [Route]) -> MGLShape? {
         return delegate?.navigationMapView?(mapView, shapeFor: routes)
     }
 
-    func navigationMapView(_ mapView: NavigationMapView, didSelect route: Route) {
+    public func navigationMapView(_ mapView: NavigationMapView, didSelect route: Route) {
         delegate?.navigationMapView?(mapView, didSelect: route)
     }
 
-    func navigationMapView(_ mapView: NavigationMapView, simplifiedShapeFor route: Route) -> MGLShape? {
+    public func navigationMapView(_ mapView: NavigationMapView, simplifiedShapeFor route: Route) -> MGLShape? {
         return delegate?.navigationMapView?(mapView, simplifiedShapeFor: route)
     }
 
-    func navigationMapView(_ mapView: MGLMapView, imageFor annotation: MGLAnnotation) -> MGLAnnotationImage? {
+    public func navigationMapView(_ mapView: MGLMapView, imageFor annotation: MGLAnnotation) -> MGLAnnotationImage? {
         return delegate?.navigationMapView?(mapView, imageFor: annotation)
     }
 
-    func navigationMapView(_ mapView: MGLMapView, viewFor annotation: MGLAnnotation) -> MGLAnnotationView? {
+    public func navigationMapView(_ mapView: MGLMapView, viewFor annotation: MGLAnnotation) -> MGLAnnotationView? {
         return delegate?.navigationMapView?(mapView, viewFor: annotation)
     }
 
-    func navigationMapViewUserAnchorPoint(_ mapView: NavigationMapView) -> CGPoint {
+    public func navigationMapViewUserAnchorPoint(_ mapView: NavigationMapView) -> CGPoint {
         //If the end of route component is showing, then put the anchor point slightly above the middle of the map
         if navigationView.endOfRouteView != nil, let show = navigationView.endOfRouteShowConstraint, show.isActive {
             return CGPoint(x: mapView.bounds.midX, y: (mapView.bounds.height * 0.4))
@@ -862,7 +874,7 @@ extension RouteMapViewController: NavigationViewDelegate {
 
 extension RouteMapViewController: StepsViewControllerDelegate {
 
-    func stepsViewController(_ viewController: StepsViewController, didSelect legIndex: Int, stepIndex: Int, cell: StepTableViewCell) {
+    public func stepsViewController(_ viewController: StepsViewController, didSelect legIndex: Int, stepIndex: Int, cell: StepTableViewCell) {
 
         let legProgress = RouteLegProgress(leg: routeController.routeProgress.route.legs[legIndex], stepIndex: stepIndex)
         let step = legProgress.currentStep
@@ -900,14 +912,14 @@ extension RouteMapViewController: StepsViewControllerDelegate {
         previewInstructionsView = instructionsView
     }
 
-    func didDismissStepsViewController(_ viewController: StepsViewController) {
+    public func didDismissStepsViewController(_ viewController: StepsViewController) {
         viewController.dismiss {
             self.stepsViewController = nil
             self.navigationView.instructionsBannerView.stepListIndicatorView.isHidden = false
         }
     }
 
-    func statusView(_ statusView: StatusView, valueChangedTo value: Double) {
+    public func statusView(_ statusView: StatusView, valueChangedTo value: Double) {
         let displayValue = 1+min(Int(9 * value), 8)
         let title = String.Localized.simulationStatus(speed: displayValue)
         showStatus(title: title, for: .infinity, interactive: true)

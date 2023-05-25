@@ -20,6 +20,7 @@ class ViewController: UIViewController, MGLMapViewDelegate {
     @IBOutlet weak var bottomBarBackground: UIView!
     
     private var navigationViewController: NavigationViewController!
+    var url = "https://api.maptiler.com/maps/streets-v2/style.json?key=kSEJrARH5sHX6qmV6MYu"
     
     // MARK: Properties
     var mapView: NavigationMapView? {
@@ -106,7 +107,7 @@ class ViewController: UIViewController, MGLMapViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        self.mapView = NavigationMapView(frame: view.bounds, styleURL: URL(string: "https://api.maptiler.com/maps/streets/style.json?key=AVXR2vOTw3aGpqw8nlv2"))
+        self.mapView = NavigationMapView(frame: view.bounds, styleURL: URL(string: url))
 
         // Reset the navigation styling to the defaults if we are returning from a presentation.
         if (presentedViewController != nil) {
@@ -250,7 +251,29 @@ class ViewController: UIViewController, MGLMapViewDelegate {
         self.navigationViewController = NavigationViewController(for: route, styles: styles, locationManager: navigationLocationManager())
         navigationViewController.delegate = self
         navigationViewController.mapView?.showsUserHeadingIndicator = true
+//        navigationViewController.annotatesSpokenInstructions = true
+        addSubViewMap()
         presentAndRemoveMapview(navigationViewController)
+    }
+    
+    private func addSubViewMap() {
+        let customButton = UIButton()
+        customButton.frame = CGRect(x: UIScreen.main.bounds.width - 60, y:UIScreen.main.bounds.height - 250, width: 50, height: 50)
+        customButton.setTitle("Center", for: .normal)
+        customButton.setTitleColor(UIColor.blue, for: .normal)
+        customButton.layer.cornerRadius = customButton.frame.height / 2
+        customButton.clipsToBounds = true
+        customButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
+        customButton.backgroundColor = UIColor.white
+        customButton.addTarget(self, action: #selector(customButtonTapped), for: .touchUpInside)
+        
+        navigationViewController.mapView?.addSubview(customButton)
+        navigationViewController.mapView?.bringSubviewToFront(customButton)
+    }
+    
+    @objc private func customButtonTapped() {
+        print("nrerer")
+        navigationViewController.routeMapViewController?.toggleOverview()
     }
 
     func navigationLocationManager() -> NavigationLocationManager {
@@ -259,7 +282,7 @@ class ViewController: UIViewController, MGLMapViewDelegate {
     }
 
     func presentAndRemoveMapview(_ navigationViewController: NavigationViewController) {
-        self.navigationViewController.mapView?.styleURL = URL(string: "https://api.maptiler.com/maps/streets/style.json?key=AVXR2vOTw3aGpqw8nlv2");
+        self.navigationViewController.mapView?.styleURL = URL(string: url);
         self.navigationViewController.mapView?.tracksUserCourse = true
         NotificationCenter.default.addObserver(self, selector: #selector(progressDidChange(_ :)), name: .routeControllerProgressDidChange, object: nil)
         present(navigationViewController, animated: true) {
@@ -397,7 +420,7 @@ extension ViewController: NavigationViewControllerDelegate {
         }
 
         confirmationController.delegate = self
-        self.mapView = NavigationMapView(frame: view.bounds, styleURL: URL(string: "https://api.maptiler.com/maps/streets/style.json?key=AVXR2vOTw3aGpqw8nlv2"))
+        self.mapView = NavigationMapView(frame: view.bounds, styleURL: URL(string: url))
         navigationViewController.present(confirmationController, animated: true, completion: nil)
         return false
     }
@@ -405,7 +428,7 @@ extension ViewController: NavigationViewControllerDelegate {
     // Called when the user hits the exit button.
     // If implemented, you are responsible for also dismissing the UI.
     func navigationViewControllerDidDismiss(_ navigationViewController: NavigationViewController, byCanceling canceled: Bool) {
-        self.mapView = NavigationMapView(frame: view.bounds, styleURL: URL(string: "https://api.maptiler.com/maps/streets/style.json?key=AVXR2vOTw3aGpqw8nlv2"))
+        self.mapView = NavigationMapView(frame: view.bounds, styleURL: URL(string: url))
         navigationViewController.dismiss(animated: true, completion: nil)
     }
 }
