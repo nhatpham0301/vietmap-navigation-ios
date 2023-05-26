@@ -11,13 +11,13 @@ class ArrowStrokePolyline: ArrowFillPolyline {}
 open class RouteMapViewController: UIViewController {
 
     @objc public var navigationView: NavigationView { return view as! NavigationView }
-    var mapView: NavigationMapView { return navigationView.mapView }
-    var statusView: StatusView { return navigationView.statusView }
-    var reportButton: FloatingButton { return navigationView.reportButton }
-    var lanesView: LanesView { return navigationView.lanesView }
-    var nextBannerView: NextBannerView { return navigationView.nextBannerView }
-    var instructionsBannerView: InstructionsBannerView { return navigationView.instructionsBannerView }
-    var instructionsBannerContentView: InstructionsBannerContentView { return navigationView.instructionsBannerContentView }
+    @objc public var mapView: NavigationMapView { return navigationView.mapView }
+    @objc public var statusView: StatusView { return navigationView.statusView }
+    @objc public var reportButton: FloatingButton { return navigationView.reportButton }
+    @objc public var lanesView: LanesView { return navigationView.lanesView }
+    @objc public var nextBannerView: NextBannerView { return navigationView.nextBannerView }
+    @objc public var instructionsBannerView: InstructionsBannerView { return navigationView.instructionsBannerView }
+    @objc public var instructionsBannerContentView: InstructionsBannerContentView { return navigationView.instructionsBannerContentView }
 
     lazy var endOfRouteViewController: EndOfRouteViewController = {
         let storyboard = UIStoryboard(name: "Navigation", bundle: .mapboxNavigation)
@@ -31,14 +31,14 @@ open class RouteMapViewController: UIViewController {
         static let recenter: Selector = #selector(RouteMapViewController.recenter(_:))
     }
 
-    var route: Route { return routeController.routeProgress.route }
-    var updateETATimer: Timer?
-    var previewInstructionsView: StepInstructionsView?
-    var lastTimeUserRerouted: Date?
-    var stepsViewController: StepsViewController?
+    @objc public var route: Route { return routeController.routeProgress.route }
+    @objc public var updateETATimer: Timer?
+    @objc public var previewInstructionsView: StepInstructionsView?
+    @objc public var lastTimeUserRerouted: Date?
+    @objc public var stepsViewController: StepsViewController?
     private lazy var geocoder: CLGeocoder = CLGeocoder()
-    var destination: Waypoint?
-    var isUsedInConjunctionWithCarPlayWindow = false {
+    @objc public var destination: Waypoint?
+    @objc public var isUsedInConjunctionWithCarPlayWindow = false {
         didSet {
             if isUsedInConjunctionWithCarPlayWindow {
                 displayPreviewInstructions()
@@ -48,16 +48,16 @@ open class RouteMapViewController: UIViewController {
         }
     }
 
-    var showsEndOfRoute: Bool = true
+    @objc public var showsEndOfRoute: Bool = true
 
-    var pendingCamera: MGLMapCamera? {
+    @objc public var pendingCamera: MGLMapCamera? {
         guard let parent = parent as? NavigationViewController else {
             return nil
         }
         return parent.pendingCamera
     }
 
-    var tiltedCamera: MGLMapCamera {
+    @objc public var tiltedCamera: MGLMapCamera {
         get {
             let camera = mapView.camera
             camera.altitude = 1000
@@ -67,7 +67,7 @@ open class RouteMapViewController: UIViewController {
     }
 
     weak var delegate: RouteMapViewControllerDelegate?
-    var routeController: Router! {
+    @objc public var routeController: Router! {
         didSet {
             navigationView.statusView.canChangeValue = routeController.locationManager is SimulatedLocationManager
             guard let destination = route.legs.last?.destination else { return }
@@ -75,8 +75,8 @@ open class RouteMapViewController: UIViewController {
         }
     }
     let distanceFormatter = DistanceFormatter(approximate: true)
-    var arrowCurrentStep: RouteStep?
-    var isInOverviewMode = false {
+    @objc public var arrowCurrentStep: RouteStep?
+    @objc public var isInOverviewMode = false {
         didSet {
             if isInOverviewMode {
                 navigationView.overviewButton.isHidden = true
@@ -94,9 +94,9 @@ open class RouteMapViewController: UIViewController {
     /**
      A Boolean value that determines whether the map annotates the locations at which instructions are spoken for debugging purposes.
      */
-    var annotatesSpokenInstructions = false
+    @objc public var annotatesSpokenInstructions = false
 
-    var overheadInsets: UIEdgeInsets {
+    @objc public var overheadInsets: UIEdgeInsets {
         return UIEdgeInsets(top: navigationView.instructionsBannerView.bounds.height, left: 20, bottom: navigationView.bottomBannerView.bounds.height, right: 20)
     }
 
